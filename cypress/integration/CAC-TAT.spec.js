@@ -2,6 +2,8 @@
 /// <reference types="Cypress" />
 
 describe('Central de Atendimento ao Cliente TAT', function() { // describe - define a suíte de testes
+    
+    const THREE_SECONDS_IM_MS = 3000
 
     beforeEach(function(){
         cy.visit('./src/index.html') // visitar pagina
@@ -13,6 +15,9 @@ describe('Central de Atendimento ao Cliente TAT', function() { // describe - def
     // .only diz que quer fazer somente aquele caso de teste
 
     it('preencher os campos obrigatorios e envia o formulario', function(){ 
+
+        cy.clock() // congelo o relogio do navegador
+
         const longText = 'Teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste, teste' // uma variavel
         
         cy.get('#firstName').type('Joao') // Pego o campo (#firstName) e escrevo Joao
@@ -23,9 +28,15 @@ describe('Central de Atendimento ao Cliente TAT', function() { // describe - def
         //cy.get('button[type="submit"]').click() // Pego um buttom do type submit e realizo a ação de click
         cy.contains('button', 'Enviar').click() // Digo qual selector CSS eu quero pegar, o segundo paramentro é o texto desse selector
         cy.get('.success').should('be.visible') // Pego uma classe .sucesso e verifico se ela está visivel 
+
+        cy.tick(THREE_SECONDS_IM_MS) // avanço o tempo do relogio do navegador
+        cy.get('.success').should('not.be.visible') // verifico se mensagem desapareceu
     })
 
     it('exibe mensagem de erro ao submeter o formulario com um email com a formatação invalida', function(){
+        
+        cy.clock() // paro o tempo do relogio do navegador
+
         cy.get('#firstName').type('Joao') // Pego o campo (#firstName) e escrevo Joao
         cy.get('#lastName').type('Almeida') // Pego o campo (#lastName) e escrevo Almeida
         cy.get('#email').type('joao.silva@pigz,com') // Pego o campo (#email) e escrevo joao.silva@pigz,com.br
@@ -33,6 +44,9 @@ describe('Central de Atendimento ao Cliente TAT', function() { // describe - def
         //cy.get('button[type="submit"]').click() // Pego um buttom do type submit e realizo a ação de click
         cy.contains('button','Enviar').click() // Digo qual selector CSS eu quero pegar, o segundo paramentro é o texto desse selector
         cy.get('.error').should('be.visible') // Pego uma classe .error e verifico se ela está visivel
+
+        cy.tick(THREE_SECONDS_IM_MS) // avanço o tempo
+        cy.get('.error').should('not.be.visible') // verifico se mensagem sumiu
     })
 
     it('campo telefone continua vazio quando preenchido com valor não numerico', function(){
@@ -41,15 +55,24 @@ describe('Central de Atendimento ao Cliente TAT', function() { // describe - def
             .should('have.value','')  // verifico se o campo está vazio
     })
 
-    it('exibe mensagem de erro quando o telefone se torna obrigatório mas não é preenchido antes do envio do formulário', function(){
-        cy.get('#firstName').type('Joao') // Pego o campo (#firstName) e escrevo Joao
-        cy.get('#lastName').type('Almeida') // Pego o campo (#lastName) e escrevo Almeida
-        cy.get('#email').type('joao.silva@pigz.com') // Pego o campo (#email) e escrevo joao.silva@pigz,com.br
-        cy.get('#phone-checkbox').click() // Pego o campo (#phone-checkbox) e realizo click nele, marcando a opção
-        cy.get('#open-text-area').type('Teste') // Pego o campo (#open-text-area) e escrevo Teste
-        //cy.get('button[type="submit"]').click() // Pego um buttom do type submit e realizo a ação de click
-        cy.contains('button','Enviar').click() // Digo qual selector CSS eu quero pegar, o segundo paramentro é o texto desse selector
-        cy.get('.error').should('be.visible') // Pego uma classe .error e verifico se ela está visivel
+    Cypress._.times(5,function(){ // Realizar o bloco de teste abaixo 5 vezes - Metodo usado para confirmar que o sistema é estavel
+        it('exibe mensagem de erro quando o telefone se torna obrigatório mas não é preenchido antes do envio do formulário', function(){
+        
+            cy.clock() // paro o tempo do relogio do navegador
+            
+            cy.get('#firstName').type('Joao') // Pego o campo (#firstName) e escrevo Joao
+            cy.get('#lastName').type('Almeida') // Pego o campo (#lastName) e escrevo Almeida
+            cy.get('#email').type('joao.silva@pigz.com') // Pego o campo (#email) e escrevo joao.silva@pigz,com.br
+            cy.get('#phone-checkbox').click() // Pego o campo (#phone-checkbox) e realizo click nele, marcando a opção
+            cy.get('#open-text-area').type('Teste') // Pego o campo (#open-text-area) e escrevo Teste
+            //cy.get('button[type="submit"]').click() // Pego um buttom do type submit e realizo a ação de click
+            cy.contains('button','Enviar').click() // Digo qual selector CSS eu quero pegar, o segundo paramentro é o texto desse selector
+            cy.get('.error').should('be.visible') // Pego uma classe .error e verifico se ela está visivel
+        
+            cy.tick(THREE_SECONDS_IM_MS) // avanço o tempo
+            cy.get('.error').should('not.be.visible') // verifico se mensagem sumiu
+        
+        })
     })
 
     it('preenche os campos nome, sobrenome, email e telefone', function(){
@@ -76,15 +99,26 @@ describe('Central de Atendimento ao Cliente TAT', function() { // describe - def
     })
 
     it('exibe mensagem de erro ao submeter o formulário sem preencher os campos obrigatórios',function(){
+
+        cy.clock() // paro o tempo
+
         //cy.get('button[type="submit"]').click() // Pego um buttom do type submit e realizo a ação de click
         cy.contains('button','Enviar').click() // Digo qual selector CSS eu quero pegar, o segundo paramentro é o texto desse selector
         cy.get('.error').should('be.visible') // verifico se mensagem de error foi exibida
+    
+        cy.tick(THREE_SECONDS_IM_MS) // avanço o tempo
+        cy.get('.error').should('not.be.visible') // verifico se mensagem sumiu
     })
 
     it('envia o formuário com sucesso usando um comando customizado', function(){
+
+        cy.clock() // paro o tempo
         cy.fillMandatoryFieldsAndSubmit() // chamo uma função chamada fillMandatoryFieldsAndSubmit() criada dentro do arquivo commands.js - arquivo usado para criação de blocos de codigos que podem ser reutilizadas
 
         cy.get('.success').should('be.visible')
+
+        cy.tick(THREE_SECONDS_IM_MS) // avanço o tempo
+        cy.get('.success').should('not.be.visible') // verifico se mensagem sumiu
     })
 
     it('seleciona um produto (Youtube) por seu texto', function(){
@@ -139,6 +173,9 @@ describe('Central de Atendimento ao Cliente TAT', function() { // describe - def
     })
 
     it('exibe mensagem de erro quando o telefone se torna obrigatório mas não é preenchido antes do envio do formulário', function(){
+        
+        cy.clock() // paro o tempo do navegador
+        
         cy.get('#firstName').type('Joao') // Pego o campo (#firstName) e escrevo Joao
         cy.get('#lastName').type('Almeida') // Pego o campo (#lastName) e escrevo Almeida
         cy.get('#email').type('joao.silva@pigz.com') // Pego o campo (#email) e escrevo joao.silva@pigz,com.br
@@ -147,6 +184,9 @@ describe('Central de Atendimento ao Cliente TAT', function() { // describe - def
         //cy.get('button[type="submit"]').click() // Pego um buttom do type submit e realizo a ação de click
         cy.contains('button','Enviar').click() // Digo qual selector CSS eu quero pegar, o segundo paramentro é o texto desse selector
         cy.get('.error').should('be.visible') // Pego uma classe .error e verifico se ela está visivel
+    
+        cy.tick(THREE_SECONDS_IM_MS) // avanço o tempo
+        cy.get('.error').should('not.be.visible') // verifico se mensagem sumiu
     })
 
     it('seleciona um arquivo da pasta fixtures',function(){
@@ -190,6 +230,55 @@ describe('Central de Atendimento ao Cliente TAT', function() { // describe - def
     
         cy.contains('Talking About Testing') // passo um texto
             .should('be.visible') // verifico se ele esta visivel na pagina
+    })
+
+    it('exibe e esconde as mensagens de sucesso e erro usando o .invoke', function() {
+        cy.get('.success') // pego o elemento da classe .success
+          .should('not.be.visible') // verifico se não está visivel
+          .invoke('show') // forço ele aparecer
+          .should('be.visible') // verifico se está visivel
+          .and('contain', 'Mensagem enviada com sucesso.') // e se contem a mensagem 'Mensagem enviada com sucesso.'
+          .invoke('hide') // escondo o elemento
+          .should('not.be.visible') // verifico se elemento sumiu
+        
+        cy.get('.error')// pego o elemento da classe .error
+          .should('not.be.visible')// verifico se não está visivel
+          .invoke('show')// forço ele aparecer
+          .should('be.visible')// verifico se está visivel
+          .and('contain', 'Valide os campos obrigatórios!')// e se contem a mensagem 'Valide os campos obrigatórios!'
+          .invoke('hide')// escondo o elemento
+          .should('not.be.visible')// verifico se elemento sumiu
+      })
+
+      it('preenche a area de texto usando o comando invoke', function(){
+        const longtext = Cypress._.repeat('0123456789',20) // criar uma string com 200 caracteres, vai repedir aquela string numerica 20 vezes
+        
+        cy.get('#open-text-area') // Pego a area
+            .invoke('val',longtext) // seta no val do open-text-area o longtext
+            .should('have.value',longtext) // verifico se a variavel foi setada
+    })
+
+    it('faz uma requisição HTTP',function(){
+        cy.request('https://cac-tat.s3.eu-central-1.amazonaws.com/index.html') // com o request é possivel fazer requisição a nivel de rede
+            .should(function(response){ // verificação onde passa um função que recebe a reposta da requisição 'response'
+                console.log(response) // log do objeto
+                const { status, statusText, body } = response // desistruturando o status, statusText, body
+                expect(status).to.equal(200) // verifico se o status é 200
+                expect(statusText).to.equal('OK') // verifico se o statusText é OK
+                expect(body).to.include('CAC TAT') // verifico se no body contem o CAC TAT
+            })
+    })
+
+    it.only('encontra o gato escondido', function(){
+        cy.get('#cat') // pego o objeto com o id #cat
+            .invoke('show') // forço ele a aparecer
+            .should('be.visible') // verifico se ele esta visivel
+
+        cy.get('#title') // pego o title
+            .invoke('text','CAT TAT') // altero o text dele
+
+        cy.get('#subtitle') // pego o subtitle
+            .invoke('text','Eu amo gatos!') // altero o texto dele
     })
 
   })
